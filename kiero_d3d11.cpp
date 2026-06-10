@@ -22,8 +22,7 @@ using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
   ID3D11DeviceContext**
 );
 
-template <>
-kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
+kiero::Error kiero::locate2(void* in, void* out, PresentFN g_log)
 {
   KIERO_UNUSED(in);
 
@@ -59,23 +58,6 @@ kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
   }
   KIERO_DEFER([&]() { factory->Release(); });
 
-  IDXGIAdapter* adapter;
-  hresult = factory->EnumAdapters(0, &adapter);
-  if (hresult != S_OK) {
-    KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
-    return Error_D3D11_EnumAdaptersFailed;
-  }
-  KIERO_DEFER([&]() { adapter->Release(); });
-
-  UINT countc = 0;
-  IDXGIAdapter* adapterc = nullptr;
-  while (factory->EnumAdapters(countc, &adapterc) != DXGI_ERROR_NOT_FOUND)
-  {
-      adapterc->Release();
-      countc++;
-  }
-  return countc;
-
   auto D3D11CreateDeviceAndSwapChain =(
     (D3D11CreateDeviceAndSwapChain_t)
     GetProcAddress(d3d11_dll, "D3D11CreateDeviceAndSwapChain")
@@ -109,54 +91,72 @@ kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
     D3D_FEATURE_LEVEL_10_0,
   };
 
-  IDXGISwapChain* swapchain;
-  ID3D11Device* device;
-  ID3D11DeviceContext* context;
-  D3D_FEATURE_LEVEL feature_level;
+  UINT count = 0;
+  IDXGIAdapter* adapter = nullptr;
+  while (factory->EnumAdapters(count, &adapter) != DXGI_ERROR_NOT_FOUND)
+  {
+    IDXGISwapChain* swapchain;
+    ID3D11Device* device;
+    ID3D11DeviceContext* context;
+    D3D_FEATURE_LEVEL feature_level;
+  
+    hresult = D3D11CreateDeviceAndSwapChain(
+      adapter,
+      D3D_DRIVER_TYPE_UNKNOWN,
+      nullptr,
+      0,
+      feature_levels,
+      ARRAYSIZE(feature_levels),
+      D3D11_SDK_VERSION,
+      &sc_desc,
+      &swapchain,
+      &device,
+      &feature_level,
+      &context
+    );
+    if (hresult != S_OK) {
+      KIERO_DBG_MSG("D3D11CreateDeviceAndSwapChain failed (%d)", hresult);
+      return Error_D3D11_CreateDeviceAndSwapChainFailed;
+    }
 
-  hresult = D3D11CreateDeviceAndSwapChain(
-    adapter,
-    D3D_DRIVER_TYPE_UNKNOWN,
-    nullptr,
-    0,
-    feature_levels,
-    ARRAYSIZE(feature_levels),
-    D3D11_SDK_VERSION,
-    &sc_desc,
-    &swapchain,
-    &device,
-    &feature_level,
-    &context
-  );
-  if (hresult != S_OK) {
-    KIERO_DBG_MSG("D3D11CreateDeviceAndSwapChain failed (%d)", hresult);
-    return Error_D3D11_CreateDeviceAndSwapChainFailed;
-  }
-  KIERO_DEFER([&]() {
+    char buffer[256];
+
+    sprintf_s(buffer, sizeof(buffer),
+      "adapter: %u", count);
+    g_log(buffer);
+  
+    for (auto vtable = *(void***)swapchain; vtable; vtable++) {
+      auto ptr = *vtable;
+      if (!ptr) break;
+      //output->swapchain_methods.push_back(ptr);
+      sprintf_s(buffer, sizeof(buffer),
+      	"swapchain: %p", ptr);
+      g_log(buffer);
+    }
+  
+    for (auto vtable = *(void***)device; vtable; vtable++) {
+      auto ptr = *vtable;
+      if (!ptr) break;
+      //output->device_methods.push_back(ptr);
+      sprintf_s(buffer, sizeof(buffer),
+      	"device: %p", ptr);
+      g_log(buffer);
+    }
+  
+    for (auto vtable = *(void***)context; vtable; vtable++) {
+      auto ptr = *vtable;
+      if (!ptr) break;
+      //output->context_methods.push_back(ptr);
+      sprintf_s(buffer, sizeof(buffer),
+      	"context: %p", ptr);
+      g_log(buffer);
+    }
+
     swapchain->Release();
     device->Release();
     context->Release();
-  });
-
-  D3D11Output* output = (D3D11Output*)out;
-
-  for (auto vtable = *(void***)swapchain; vtable; vtable++) {
-    auto ptr = *vtable;
-    if (!ptr) break;
-    output->swapchain_methods.push_back(ptr);
+    adapter->Release();
+    count++;
   }
-
-  for (auto vtable = *(void***)device; vtable; vtable++) {
-    auto ptr = *vtable;
-    if (!ptr) break;
-    output->device_methods.push_back(ptr);
-  }
-
-  for (auto vtable = *(void***)context; vtable; vtable++) {
-    auto ptr = *vtable;
-    if (!ptr) break;
-    output->context_methods.push_back(ptr);
-  }
-
-  return Error_Nil;
+  return count;
 }
