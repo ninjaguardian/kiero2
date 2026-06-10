@@ -60,7 +60,7 @@ kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
   KIERO_DEFER([&]() { factory->Release(); });
 
   IDXGIAdapter* adapter;
-  hresult = factory->EnumAdapters(0, &adapter);
+  hresult = factory->EnumAdapters(10, &adapter);
   if (hresult != S_OK) {
     KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
     return Error_D3D11_EnumAdaptersFailed;
