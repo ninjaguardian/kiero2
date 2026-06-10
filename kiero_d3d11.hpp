@@ -35,7 +35,7 @@ struct D3D11Output {
 
 typedef HRESULT(__stdcall* PresentFN)(IDXGISwapChain*, UINT, UINT);
 
-kiero::Error kiero::locate2(void* in, void* out, PresentFN g_log);
+Error locate2(void* in, void* out, PresentFN g_log);
 
 } // namespace kiero
 
