@@ -33,8 +33,9 @@ struct D3D11Output {
   std::vector<void*> context_methods;
 };
 
-template <>
-kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out);
+typedef HRESULT(__stdcall* PresentFN)(IDXGISwapChain*, UINT, UINT);
+
+kiero::Error kiero::locate2(void* in, void* out, PresentFN g_log);
 
 } // namespace kiero
 
