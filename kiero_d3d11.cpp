@@ -60,12 +60,21 @@ kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
   KIERO_DEFER([&]() { factory->Release(); });
 
   IDXGIAdapter* adapter;
-  hresult = factory->EnumAdapters(10, &adapter);
+  hresult = factory->EnumAdapters(0, &adapter);
   if (hresult != S_OK) {
     KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
     return Error_D3D11_EnumAdaptersFailed;
   }
   KIERO_DEFER([&]() { adapter->Release(); });
+
+  UINT countc = 0;
+  IDXGIAdapter* adapterc = nullptr;
+  while (factory->EnumAdapters(countc, &adapterc) != DXGI_ERROR_NOT_FOUND)
+  {
+      adapterc->Release();
+      countc++;
+  }
+  return countc;
 
   auto D3D11CreateDeviceAndSwapChain =(
     (D3D11CreateDeviceAndSwapChain_t)
