@@ -25,6 +25,7 @@ using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
 kiero::Error kiero::locate2(void* in, void* out, PresentFN g_log)
 {
   KIERO_UNUSED(in);
+  KIERO_UNUSED(out);
 
   auto dxgi_dll = GetModuleHandleA("dxgi.dll");
   if (!dxgi_dll) {
