@@ -22,7 +22,7 @@ using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
   ID3D11DeviceContext**
 );
 
-kiero::Error kiero::locate2(void* in, void* out, kiero::PresentFN g_log)
+kiero::Error kiero::locate2(void* in, void* out, kiero::LogCallback g_log)
 {
   KIERO_UNUSED(in);
   KIERO_UNUSED(out);
