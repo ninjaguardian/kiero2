@@ -33,7 +33,7 @@ struct D3D11Output {
   std::vector<void*> context_methods;
 };
 
-Error locate2(void* in, void* out);
+Error locate2();
 
 } // namespace kiero
 
