@@ -22,7 +22,7 @@ using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
   ID3D11DeviceContext**
 );
 
-kiero::Error kiero::locate2(void* in, void* out, kiero::LogCallback g_log)
+kiero::Error kiero::locate2(void* in, void* out)
 {
   KIERO_UNUSED(in);
   KIERO_UNUSED(out);
@@ -120,37 +120,27 @@ kiero::Error kiero::locate2(void* in, void* out, kiero::LogCallback g_log)
       return Error_D3D11_CreateDeviceAndSwapChainFailed;
     }
 
-    char buffer[256];
-
-    sprintf_s(buffer, sizeof(buffer),
-      "adapter: %u", count);
-    g_log(buffer);
-  
+    printf("adapter: %u", count);
+    
     for (auto vtable = *(void***)swapchain; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->swapchain_methods.push_back(ptr);
-      sprintf_s(buffer, sizeof(buffer),
-      	"swapchain: %p", ptr);
-      g_log(buffer);
+      printf("swapchain: %p", ptr);
     }
   
     for (auto vtable = *(void***)device; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->device_methods.push_back(ptr);
-      sprintf_s(buffer, sizeof(buffer),
-      	"device: %p", ptr);
-      g_log(buffer);
+      printf("device: %p", ptr);
     }
   
     for (auto vtable = *(void***)context; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->context_methods.push_back(ptr);
-      sprintf_s(buffer, sizeof(buffer),
-      	"context: %p", ptr);
-      g_log(buffer);
+      printf("context: %p", ptr);
     }
 
     swapchain->Release();
