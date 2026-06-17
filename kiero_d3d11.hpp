@@ -33,9 +33,7 @@ struct D3D11Output {
   std::vector<void*> context_methods;
 };
 
-typedef void(__cdecl* LogCallback)(const char* msg);
-
-Error locate2(void* in, void* out, LogCallback g_log);
+Error locate2(void* in, void* out);
 
 } // namespace kiero
 
