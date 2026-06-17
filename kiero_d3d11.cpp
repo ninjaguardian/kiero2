@@ -5,11 +5,8 @@
 #include "kiero_intern.hpp"
 
 
-kiero::Error kiero::locate2(void* in, void* out)
+kiero::Error kiero::locate2()
 {
-  KIERO_UNUSED(in);
-  KIERO_UNUSED(out);
-
   IDXGIFactory* factory;
   auto hresult = CreateDXGIFactory(
     __uuidof(IDXGIFactory),
@@ -73,27 +70,27 @@ kiero::Error kiero::locate2(void* in, void* out)
       return Error_D3D11_CreateDeviceAndSwapChainFailed;
     }
 
-    printf("adapter: %u", count);
+    printf("\nadapter: %u\n", count);
     
     for (auto vtable = *(void***)swapchain; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->swapchain_methods.push_back(ptr);
-      printf("swapchain: %p", ptr);
+      printf("swapchain: %p\n", ptr);
     }
   
     for (auto vtable = *(void***)device; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->device_methods.push_back(ptr);
-      printf("device: %p", ptr);
+      printf("device: %p\n", ptr);
     }
   
     for (auto vtable = *(void***)context; vtable; vtable++) {
       auto ptr = *vtable;
       if (!ptr) break;
       //output->context_methods.push_back(ptr);
-      printf("context: %p", ptr);
+      printf("context: %p\n", ptr);
     }
 
     swapchain->Release();
